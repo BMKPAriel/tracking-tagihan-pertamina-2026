@@ -208,6 +208,47 @@ td.sel .dur{font-size:11px;font-weight:800;margin-top:2px}
   .kpi .ang{font-size:26px}
   .judul-hal h2{font-size:20px}
 }
+
+/* ====== CETAK / PDF ====== */
+#cetak{display:none}
+.lembar-cetak{position:relative;background:#fff;color:#111;overflow:hidden;page-break-after:always;break-after:page}
+.lembar-cetak:last-child{page-break-after:auto;break-after:auto}
+.lembar-cetak.tegak{width:210mm;height:295mm;padding:11mm 12mm 14mm}
+.lembar-cetak.baring{width:297mm;height:208mm;padding:9mm 10mm 12mm}
+.kop-cetak{display:flex;align-items:center;gap:10mm;border-bottom:2.4pt solid #8E0B20;padding-bottom:3mm;margin-bottom:4mm}
+.kop-cetak img{height:15mm;width:auto}
+.kop-cetak .jd{flex:1}
+.kop-cetak h1{font-size:14pt;font-weight:800;margin:0;letter-spacing:-.02em;color:#111}
+.kop-cetak .sub{font-size:8.5pt;color:#444;margin-top:1mm}
+.kop-cetak .kanan{text-align:right;font-size:8pt;color:#444;line-height:1.5}
+.kaki-cetak{position:absolute;left:12mm;right:12mm;bottom:6mm;display:flex;justify-content:space-between;
+  border-top:.6pt solid #bbb;padding-top:2mm;font-size:7.5pt;color:#555}
+.lembar-cetak.baring .kaki-cetak{left:10mm;right:10mm;bottom:5mm}
+.kaki-cetak b{color:#111}
+table.cetak{width:100%;border-collapse:collapse;font-size:8.5pt}
+table.cetak th,table.cetak td{border:.5pt solid #b9c0cc;padding:1.6mm 1.8mm;vertical-align:top;text-align:left}
+table.cetak thead th{background:#F1F4F9;font-size:7.5pt;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:#333}
+table.cetak td.a{text-align:center}table.cetak td.k{text-align:right}
+table.cetak tr.grup-cetak td{background:#FBE3E7;font-weight:800;font-size:8pt;letter-spacing:.04em;color:#8E0B20}
+table.papan-cetak{font-size:6.4pt}
+table.papan-cetak th,table.papan-cetak td{padding:.9mm .6mm}
+table.papan-cetak thead th{font-size:5.8pt;text-align:center;line-height:1.15}
+table.papan-cetak td.sl{text-align:center;white-space:nowrap;font-size:6.2pt}
+.sc{background:#EAF9EF}.sn{background:#FEF6E2}.sl2{background:#FDECEC}.sk{background:#FFF0F1;font-weight:800;color:#8E0B20}
+.ringkas-cetak{display:flex;gap:3mm;margin-bottom:4mm}
+.ringkas-cetak div{flex:1;border:.6pt solid #c8cfdb;border-radius:2mm;padding:2.5mm 3mm}
+.ringkas-cetak span{display:block;font-size:7pt;text-transform:uppercase;letter-spacing:.05em;color:#555;font-weight:700}
+.ringkas-cetak b{display:block;font-size:12pt;font-weight:800;margin-top:1mm}
+.ttd-cetak{display:flex;justify-content:space-between;margin-top:6mm;font-size:8.5pt}
+.ttd-cetak div{width:55mm;text-align:center}
+.ttd-cetak .garis{margin-top:12mm;border-top:.6pt solid #333;padding-top:1.5mm}
+@media print{
+  html,body{background:#fff!important;margin:0!important;padding:0!important}
+  #gerbang,header,main,.tirai,.roti{display:none!important}
+  #cetak{display:block!important}
+  .lembar-cetak{box-shadow:none!important}
+}
+
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -267,6 +308,8 @@ td.sel .dur{font-size:11px;font-weight:800;margin-top:2px}
 
 <div class="tirai" id="tirai"><div class="jendela" id="jendela"></div></div>
 <div class="roti" id="roti"></div>
+<div id="cetak"></div>
+<style id="gaya-halaman"></style>
 <script>
 /* =======================================================================
    TRACKING TAGIHAN — mesin data
@@ -569,7 +612,8 @@ function gRekap(){
   $('#hal-rekap').innerHTML=`
   <div class="judul-hal">
     <div><h2>Rekapan tagihan</h2><p>Posisi seluruh tagihan per ${tglRapi(hariIni())} · seluruh durasi dihitung dalam hari kerja</p></div>
-    ${bisaKelolaData()?'<button class="tbl isi" id="tbl-tambah-cepat">Tambah tagihan</button>':''}
+    <div style="display:flex;gap:9px">${tblCetak('rekap')}
+    ${bisaKelolaData()?'<button class="tbl isi" id="tbl-tambah-cepat">Tambah tagihan</button>':''}</div>
   </div>
 
   <div id="bar-hadir-rekap"></div>
@@ -622,7 +666,7 @@ function gRekap(){
         </div>
       </div>`).join('')}
   </div>`;
-  gambarHadir('#bar-hadir-rekap');
+  gambarHadir('#bar-hadir-rekap'); pasangCetak();
   if($('#tbl-tambah-cepat')) $('#tbl-tambah-cepat').onclick=()=>formTagihan();
 }
 
@@ -638,7 +682,7 @@ function gMonitor(){
   $('#hal-monitor').innerHTML=`
   <div class="judul-hal">
     <div><h2>Monitor tagihan</h2><p>Tampilan rapat — dikelompokkan per area, hanya tagihan outstanding.</p></div>
-    <button class="tbl" id="tbl-layar">Layar penuh</button>
+    <div style="display:flex;gap:9px">${tblCetak('rekap')}<button class="tbl" id="tbl-layar">Layar penuh</button></div>
   </div>
   <div class="monitor" id="kotak-monitor">
     <div style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;align-items:end">
@@ -690,6 +734,7 @@ function gMonitor(){
       </div>`;
     }).join('')}
   </div>`;
+  pasangCetak();
   $('#tbl-layar').onclick=()=>{ const el=$('#kotak-monitor');
     if(el.requestFullscreen) el.requestFullscreen().catch(()=>roti('Layar penuh tidak didukung peramban ini.'));
     else roti('Layar penuh tidak didukung peramban ini.'); };
@@ -767,6 +812,7 @@ function gPapan(){
     <div><h2>Papan tracking</h2><p>Hanya tagihan <b>outstanding</b>, terurut otomatis per area: MA1 → MA2 → MA3 → MA2+MA3 → LTSA. ${d.length} tagihan × 14 tahapan.</p></div>
     <div style="display:flex;gap:9px">
       <button class="tbl" id="tbl-ringkas">${ringkas?'Tampilan lengkap':'Rapatkan kolom'}</button>
+      ${tblCetak('papan')}
       <button class="tbl" id="tbl-csv">Unduh CSV</button>
     </div>
   </div>
@@ -797,7 +843,7 @@ function gPapan(){
   $('#tbl-csv').onclick=()=>unduhCSV(false);
   document.querySelectorAll('[data-isi]').forEach(b=>b.onclick=()=>formIsiTanggal(b.dataset.isi,+b.dataset.t));
   document.querySelectorAll('[data-catatan]').forEach(b=>b.onclick=()=>formCatatan(b.dataset.catatan));
-  gambarHadir('#bar-hadir-papan');
+  gambarHadir('#bar-hadir-papan'); pasangCetak();
 }
 
 function unduhCSV(termasukLunas){
@@ -824,6 +870,7 @@ function gFinance(){
   <div class="judul-hal">
     <div><h2>Tugas Ati — Finance</h2>
     <p>Daftar tagihan yang sudah lewat target dan perlu diingatkan ke PIC-nya hari ini.</p></div>
+    ${tblCetak('finance')}
   </div>
 
   <div id="bar-hadir-finance"></div>
@@ -895,7 +942,7 @@ function gFinance(){
     })()}
   </div>`;
 
-  gambarHadir('#bar-hadir-finance');
+  gambarHadir('#bar-hadir-finance'); pasangCetak();
   document.querySelectorAll('[data-pesan]').forEach(b=>b.onclick=()=>formPesan(b.dataset.pesan));
   document.querySelectorAll('[data-ingat]').forEach(b=>b.onclick=()=>tandaiIngat(b.dataset.ingat));
   document.querySelectorAll('[data-catatan]').forEach(b=>b.onclick=()=>formCatatan(b.dataset.catatan));
@@ -1134,7 +1181,7 @@ function gKpi(){
   $('#hal-kpi').innerHTML=`
   <div class="judul-hal">
     <div><h2>KPI karyawan</h2><p>Dihitung otomatis dari tanggal tiap tahapan. ${orang.reduce((s,o)=>s+o.selesai,0)} tahapan sudah dinilai.</p></div>
-    <button class="tbl" id="tbl-rumus">Rumus penilaian</button>
+    <div style="display:flex;gap:9px">${tblCetak('kpi')}<button class="tbl" id="tbl-rumus">Rumus penilaian</button></div>
   </div>
   ${orang.map((o,i)=>`
     <div class="orang">
@@ -1172,6 +1219,7 @@ function gKpi(){
         <div class="bar" style="max-width:none"><i style="width:${Math.max(5,v.hari/mx*100)}%"></i></div></div>`).join('');
     })()}
   </div>`;
+  pasangCetak();
   $('#tbl-rumus').onclick=()=>bukaJendela(`<h3>Rumus penilaian KPI</h3>
     <div class="rumus">Durasi tahapan = HARI KERJA(tanggal tahap sebelumnya → tanggal tahap ini)
                  Sabtu, Minggu, dan hari libur tidak dihitung
@@ -1217,7 +1265,8 @@ function gLunas(){
   $('#hal-lunas').innerHTML=`
   <div class="judul-hal">
     <div><h2>Tagihan lunas</h2><p>Arsip tagihan yang sudah dibayar — tidak lagi muncul di papan tracking.</p></div>
-    <button class="tbl" id="tbl-csv-lunas">Unduh CSV semua tagihan</button>
+    <div style="display:flex;gap:9px">${tblCetak('lunas')}
+    <button class="tbl" id="tbl-csv-lunas">Unduh CSV semua tagihan</button></div>
   </div>
   <div class="kisi kisi-4" style="margin-bottom:18px">
     <div class="kpi k-hijau"><div class="lab">Total cair</div><div class="ang">${rupiahSingkat(nilai)}</div><div class="sub">${l.length} tagihan lunas</div></div>
@@ -1239,6 +1288,7 @@ function gLunas(){
         ${bisaInput()?`<button class="tbl kecil" data-buka="${t.id}">Lihat / ubah tanggal</button>`:''}
       </div>
     </div>`).join('') : '<div class="kartu"><p class="kosong">Belum ada tagihan yang lunas.</p></div>'}`;
+  pasangCetak();
   $('#tbl-csv-lunas').onclick=()=>unduhCSV(true);
   document.querySelectorAll('[data-buka]').forEach(b=>b.onclick=()=>formTagihan(b.dataset.buka));
 }
@@ -1439,6 +1489,213 @@ function formSandi(i){
     if(SAYA&&SAYA.nama===p.nama) localStorage.setItem(KUNCI+'_saya',JSON.stringify(SAYA));
     tutupJendela(); roti('Sandi '+p.nama+' tersimpan.'); gAtur();
   };
+}
+
+/* =======================================================================
+   CETAK / SIMPAN PDF — A4 dengan nomor halaman
+   ======================================================================= */
+function kopCetak(judul, sub){
+  return `<div class="kop-cetak">
+    <img src="${LOGO_BMKP}" alt="BMKP">
+    <div class="jd"><h1>${esc(judul)}</h1><div class="sub">${esc(sub)}</div></div>
+    <div class="kanan">PT. Bumimarga Kharisma Perkasa<br>Tagihan Unit Rate Isolasi 2026<br>Dicetak ${tglRapi(hariIni())}</div>
+  </div>`;
+}
+function tandaTangan(){
+  return `<div class="ttd-cetak">
+    <div>Disiapkan oleh<div class="garis">${esc(SAYA?SAYA.nama:'')}<br>${esc(SAYA&&SAYA.jabatan?SAYA.jabatan:'')}</div></div>
+    <div>Diperiksa<div class="garis">Ati<br>Finance</div></div>
+    <div>Mengetahui<div class="garis">.............................<br>Manajemen</div></div>
+  </div>`;
+}
+function potong(baris, perHal, perHalAwal){
+  const hal=[]; let i=0, batas=perHalAwal||perHal;
+  while(i<baris.length){ hal.push(baris.slice(i,i+batas)); i+=batas; batas=perHal; }
+  return hal.length?hal:[[]];
+}
+function cetakDok(judul, sub, isiHalaman, orientasi){
+  const total=isiHalaman.length;
+  $('#gaya-halaman').textContent =
+    `@page{size:A4 ${orientasi==='baring'?'landscape':'portrait'};margin:0}`;
+  $('#cetak').innerHTML = isiHalaman.map((isi,i)=>`
+    <div class="lembar-cetak ${orientasi}">
+      ${kopCetak(judul, sub)}
+      <div>${isi}</div>
+      <div class="kaki-cetak">
+        <span>Tracking Tagihan · dicetak oleh <b>${esc(SAYA?SAYA.nama:'')}</b> pada ${new Date().toLocaleString('id-ID')}</span>
+        <span>Halaman <b>${i+1}</b> dari <b>${total}</b></span>
+      </div>
+    </div>`).join('');
+  setTimeout(()=>{ window.print(); }, 120);
+}
+
+/* ---- 1. papan tracking (A4 melintang) ---- */
+function cetakPapan(){
+  const d=outstanding();
+  const baris=[]; let no=0, areaTerakhir=null;
+  d.forEach(({t,h})=>{
+    const a=t.area||'—';
+    if(a!==areaTerakhir){
+      const g=d.filter(x=>(x.t.area||'—')===a);
+      baris.push(`<tr class="grup-cetak"><td colspan="${DB.tahapan.length+5}">AREA ${esc(a)} — ${g.length} tagihan · ${rupiah(g.reduce((s,x)=>s+(x.t.nilai||0),0))}</td></tr>`);
+      areaTerakhir=a;
+    }
+    no++;
+    const sel=h.langkah.map(l=>{
+      if(!l.tgl){
+        const kini=h.tahapKini&&l.no===h.tahapKini.no;
+        return kini? `<td class="sl sk">DI SINI<br>${h.lewat>0?'+'+h.lewat+'h':(h.tahapKini.berjalan||0)+'/'+l.target}</td>`
+                   : '<td class="sl">–</td>';
+      }
+      const k=l.status==='cepat'?'sc':l.status==='normal'?'sn':l.status==='lambat'?'sl2':'';
+      return `<td class="sl ${k}">${tglPendek(l.tgl)}<br>${l.status==='mulai'?'START':l.durasi+'h'}</td>`;
+    }).join('');
+    baris.push(`<tr>
+      <td class="a">${no}</td>
+      <td><b>${esc(t.nama)}</b><br>${esc(t.periode||'')}</td>
+      <td class="k">${rupiah(t.nilai)}</td>
+      ${sel}
+      <td class="a"><b>${h.umur==null?'–':h.umur}</b></td>
+      <td>${h.tahapKini?h.tahapKini.no+'. ':''}${esc(h.namaKini)}<br><b>${esc(h.picKini||'')}</b>${h.lewat>0?` — lewat ${h.lewat} hari`:''}</td>
+    </tr>`);
+  });
+  const kepala=`<tr>
+    <th style="width:7mm">No</th><th style="width:42mm">Nama tagihan</th><th style="width:24mm">Nilai</th>
+    ${DB.tahapan.map(th=>`<th>${th.no}. ${esc(th.nama)}<br>${esc(th.pic)} · ${th.target}h</th>`).join('')}
+    <th style="width:11mm">Total hari</th><th style="width:36mm">Posisi sekarang</th></tr>`;
+  const hal=potong(baris,22,17).map(b=>`<table class="cetak papan-cetak"><thead>${kepala}</thead><tbody>${b.join('')}</tbody></table>`);
+
+  const kendala=d.filter(x=>x.t.catatan).map(({t,h})=>`<tr>
+    <td style="width:52mm"><b>${esc(t.nama)}</b><br>${esc(t.area||'')}</td>
+    <td style="width:44mm">${h.tahapKini?h.tahapKini.no+'. ':''}${esc(h.namaKini)} — ${esc(h.picKini||'')}</td>
+    <td>${esc(t.catatan)}</td></tr>`);
+  if(kendala.length){
+    potong(kendala,16).forEach(b=>hal.push(
+      `<h3 style="font-size:10pt;margin:0 0 3mm">Keterangan / kendala tiap tagihan</h3>
+       <table class="cetak"><thead><tr><th>Tagihan</th><th>Posisi</th><th>Kendala</th></tr></thead><tbody>${b.join('')}</tbody></table>
+       ${tandaTangan()}`));
+  }
+  cetakDok('Papan Tracking Tagihan — Outstanding',
+    `${d.length} tagihan outstanding · nilai ${rupiah(d.reduce((s,x)=>s+(x.t.nilai||0),0))} · seluruh durasi dalam hari kerja`,
+    hal,'baring');
+}
+
+/* ---- 2. rekapan tagihan (A4 tegak) ---- */
+function cetakRekap(){
+  const d=semua(), out=outstanding(), lns=lunasSaja(), tl=telat();
+  const n=a=>a.reduce((s,x)=>s+(x.t.nilai||0),0);
+  const ringkas=`<div class="ringkas-cetak">
+    <div><span>Seluruh tagihan</span><b>${rupiahSingkat(n(d))}</b>${d.length} tagihan</div>
+    <div><span>Outstanding</span><b>${rupiahSingkat(n(out))}</b>${out.length} tagihan</div>
+    <div><span>Lewat target</span><b>${rupiahSingkat(n(tl))}</b>${tl.length} tagihan</div>
+    <div><span>Sudah lunas</span><b>${rupiahSingkat(n(lns))}</b>${lns.length} tagihan</div>
+  </div>`;
+  const baris=[]; let no=0, areaTerakhir=null;
+  d.forEach(({t,h})=>{
+    const a=t.area||'—';
+    if(a!==areaTerakhir){
+      const g=d.filter(x=>(x.t.area||'—')===a);
+      baris.push(`<tr class="grup-cetak"><td colspan="7">AREA ${esc(a)} — ${g.length} tagihan · ${rupiah(n(g))}</td></tr>`);
+      areaTerakhir=a;
+    }
+    no++;
+    baris.push(`<tr>
+      <td class="a">${no}</td>
+      <td><b>${esc(t.nama)}</b><br><span style="color:#555">${esc(t.periode||'')}</span></td>
+      <td class="k">${rupiah(t.nilai)}</td>
+      <td>${h.tahapKini?h.tahapKini.no+'. ':''}${esc(h.namaKini)}</td>
+      <td>${esc(h.picKini||'–')}</td>
+      <td class="a">${h.umur==null?'–':h.umur}</td>
+      <td>${h.selesai?'LUNAS':(h.terisi===0?'Belum mulai':(h.lewat>0?'Lewat '+h.lewat+' hari':'Dalam target'))}</td>
+    </tr>`);
+  });
+  const kepala=`<tr><th>No</th><th>Nama tagihan</th><th>Nilai</th><th>Posisi sekarang</th><th>PIC</th><th>Hari</th><th>Status</th></tr>`;
+  const hal=potong(baris,25,20).map((b,i)=>
+    `${i===0?ringkas:''}<table class="cetak"><thead>${kepala}</thead><tbody>${b.join('')}</tbody></table>`);
+  hal[hal.length-1]+=tandaTangan();
+  cetakDok('Rekapan Tagihan Unit Rate Isolasi',
+    `Posisi per ${tglRapi(hariIni())} · MA1 · MA2 · MA3 · LTSA`, hal,'tegak');
+}
+
+/* ---- 3. daftar tindak lanjut finance (A4 tegak) ---- */
+function cetakFinance(){
+  const tl=telat();
+  const baris=tl.map(({t,h},i)=>{
+    const akhir=(t.peringatan||[]).slice(-1)[0];
+    return `<tr>
+      <td class="a">${i+1}</td>
+      <td><b>${esc(t.nama)}</b><br><span style="color:#555">${esc(t.area||'')} · ${esc(t.periode||'')}</span></td>
+      <td class="k">${rupiah(t.nilai)}</td>
+      <td>${h.tahapKini.no}. ${esc(h.tahapKini.nama)}<br><b>${esc(h.picKini)}</b></td>
+      <td class="a">${tglPendek(h.tglAkhir)}</td>
+      <td class="a"><b>${h.tahapKini.berjalan}</b> / ${h.tahapKini.target}<br>lewat ${h.lewat}</td>
+      <td>${akhir?tglPendek(akhir.tgl)+' ('+esc(akhir.cara||'')+')':'belum'}</td>
+      <td>${esc(t.catatan||'')}</td></tr>`;
+  });
+  const perPic={};
+  tl.forEach(({t,h})=>{ const k=h.picKini; perPic[k]=perPic[k]||{n:0,hari:0,nilai:0};
+    perPic[k].n++; perPic[k].hari+=h.lewat; perPic[k].nilai+=(t.nilai||0); });
+  const rekapPic=`<h3 style="font-size:10pt;margin:5mm 0 2mm">Rekap per PIC</h3>
+    <table class="cetak"><thead><tr><th>PIC</th><th>Tagihan telat</th><th>Total hari lewat</th><th>Nilai tertahan</th></tr></thead><tbody>
+    ${Object.entries(perPic).sort((a,b)=>b[1].hari-a[1].hari).map(([k,v])=>
+      `<tr><td><b>${esc(k)}</b></td><td class="a">${v.n}</td><td class="a">${v.hari}</td><td class="k">${rupiah(v.nilai)}</td></tr>`).join('')}
+    </tbody></table>`;
+  const kepala=`<tr><th>No</th><th>Nama tagihan</th><th>Nilai</th><th>Tahapan & PIC</th><th>Sejak</th><th>Hari</th><th>Diingatkan</th><th>Kendala</th></tr>`;
+  const hal=potong(baris,20,16).map(b=>`<table class="cetak"><thead>${kepala}</thead><tbody>${b.join('')}</tbody></table>`);
+  hal[hal.length-1]+=rekapPic+tandaTangan();
+  cetakDok('Daftar Tindak Lanjut Tagihan Lewat Target',
+    `${tl.length} tagihan perlu diingatkan · nilai tertahan ${rupiah(tl.reduce((s,x)=>s+(x.t.nilai||0),0))}`, hal,'tegak');
+}
+
+/* ---- 4. KPI karyawan (A4 tegak) ---- */
+function cetakKpi(){
+  const orang=kpiOrang();
+  const baris=orang.map((o,i)=>`<tr>
+    <td class="a">${i+1}</td><td><b>${esc(o.nama)}</b></td>
+    <td class="a">${o.tugasTahap}</td><td class="a">${o.selesai}</td>
+    <td class="a">${o.tepat}</td><td class="a">${o.lambat}</td>
+    <td class="a">${o.ketepatan==null?'–':Math.round(o.ketepatan)+'%'}</td>
+    <td class="a">${o.rerata==null?'–':o.rerata.toFixed(1)}</td>
+    <td class="a">${o.telatHari}</td><td class="a">${o.aktif}${o.aktifLewat?' ('+o.aktifLewat+' telat)':''}</td>
+    <td class="a"><b>${o.skor}</b></td><td>${esc(o.predikat)}</td></tr>`);
+  const kepala=`<tr><th>#</th><th>Nama</th><th>Tahapan dipegang</th><th>Selesai</th><th>Tepat</th><th>Lewat</th>
+    <th>% tepat</th><th>Rata-rata hari</th><th>Hari telat</th><th>Di tangan</th><th>Skor</th><th>Predikat</th></tr>`;
+  const peta={};
+  semua().forEach(({h})=>h.langkah.forEach(l=>{ if(l.tgl&&l.status==='lambat'){
+    const k=l.no+'. '+l.nama+' ('+l.pic+')'; peta[k]=peta[k]||{n:0,hari:0}; peta[k].n++; peta[k].hari+=l.selisih; }}));
+  const hambatan=`<h3 style="font-size:10pt;margin:6mm 0 2mm">Tahapan paling sering lewat target</h3>
+    <table class="cetak"><thead><tr><th>Tahapan</th><th>Jumlah kejadian</th><th>Total hari kelebihan</th></tr></thead><tbody>
+    ${Object.entries(peta).sort((a,b)=>b[1].hari-a[1].hari).map(([k,v])=>
+      `<tr><td>${esc(k)}</td><td class="a">${v.n}×</td><td class="a">+${v.hari} hari</td></tr>`).join('')||'<tr><td colspan="3">Tidak ada.</td></tr>'}
+    </tbody></table>
+    <p style="font-size:8pt;color:#444;margin-top:4mm">Skor = Ketepatan (0–60) + Kecepatan (0–25) + Disiplin (0–15).
+    Predikat: ≥85 Sangat Baik · 70–84 Baik · 55–69 Cukup · &lt;55 Perlu Perbaikan. Seluruh durasi dihitung dalam hari kerja.</p>`;
+  const hal=potong(baris,24,20).map(b=>`<table class="cetak"><thead>${kepala}</thead><tbody>${b.join('')}</tbody></table>`);
+  hal[hal.length-1]+=hambatan+tandaTangan();
+  cetakDok('KPI Karyawan — Penanganan Tagihan', `Dinilai dari seluruh tahapan yang sudah terisi · per ${tglRapi(hariIni())}`, hal,'tegak');
+}
+
+/* ---- 5. tagihan lunas (A4 tegak) ---- */
+function cetakLunas(){
+  const l=lunasSaja().sort((a,b)=>(b.h.tglAkhir||'').localeCompare(a.h.tglAkhir||''));
+  const baris=l.map(({t,h},i)=>`<tr>
+    <td class="a">${i+1}</td><td><b>${esc(t.nama)}</b><br><span style="color:#555">${esc(t.periode||'')}</span></td>
+    <td class="a">${esc(t.area||'')}</td><td class="k">${rupiah(t.nilai)}</td>
+    <td class="a">${tglPendek(h.mulai)}</td><td class="a">${tglPendek(h.tglAkhir)}</td>
+    <td class="a"><b>${h.umur}</b></td></tr>`);
+  const kepala=`<tr><th>No</th><th>Nama tagihan</th><th>Area</th><th>Nilai</th><th>Mulai</th><th>Cair</th><th>Hari kerja</th></tr>`;
+  const hal=potong(baris,24,20).map(b=>`<table class="cetak"><thead>${kepala}</thead><tbody>${b.join('')}</tbody></table>`);
+  hal[hal.length-1]+=tandaTangan();
+  cetakDok('Arsip Tagihan Lunas', `${l.length} tagihan · total cair ${rupiah(l.reduce((s,x)=>s+(x.t.nilai||0),0))}`, hal,'tegak');
+}
+
+function tblCetak(id){
+  return `<button class="tbl" data-cetak="${id}">Cetak / PDF</button>`;
+}
+function pasangCetak(){
+  document.querySelectorAll('[data-cetak]').forEach(b=>b.onclick=()=>{
+    ({papan:cetakPapan,rekap:cetakRekap,finance:cetakFinance,kpi:cetakKpi,lunas:cetakLunas})[b.dataset.cetak]();
+  });
 }
 
 /* =======================================================================
